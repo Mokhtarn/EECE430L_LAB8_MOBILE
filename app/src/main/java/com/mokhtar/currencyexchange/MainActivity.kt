@@ -70,11 +70,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        setMenu()
-    }
-
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         this.menu = menu
         setMenu()
@@ -149,14 +144,25 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun addTransaction(transaction: Transaction) {
-        ExchangeService.exchangeApi().addTransaction(transaction).enqueue(object : Callback<Any> {
-            override fun onResponse(call: Call<Any>, response: Response<Any>) {
-                Snackbar.make(fab as View, "Transaction added!", Snackbar.LENGTH_LONG).show()
+        ExchangeService.exchangeApi().addTransaction(
+            transaction,
+            if (Authentication.getToken() != null) {
+                "Bearer ${Authentication.getToken()}"
+            } else {
+                null
             }
+        ).enqueue(object : Callback<Any> {
+                override fun onResponse(call: Call<Any>, response: Response<Any>) {
+                    Snackbar.make(fab as View, "Transaction added!", Snackbar.LENGTH_LONG).show()
+                }
 
-            override fun onFailure(call: Call<Any>, t: Throwable) {
-                Snackbar.make(fab as View, "Could not add transaction.", Snackbar.LENGTH_LONG).show()
-            }
-        })
+                override fun onFailure(call: Call<Any>, t: Throwable) {
+                    Snackbar.make(
+                        fab as View,
+                        "Could not add transaction.",
+                        Snackbar.LENGTH_LONG
+                    ).show()
+                }
+            })
     }
 }

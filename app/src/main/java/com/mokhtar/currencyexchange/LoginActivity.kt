@@ -39,17 +39,14 @@ class LoginActivity : AppCompatActivity() {
             password = passwordEditText?.editText?.text.toString()
         }
 
-        submitButton?.isEnabled = false
         ExchangeService.exchangeApi().authenticate(user).enqueue(object : Callback<Token> {
             override fun onFailure(call: Call<Token>, t: Throwable) {
-                submitButton?.isEnabled = true
                 showMessage("Could not log in.")
             }
 
             override fun onResponse(call: Call<Token>, response: Response<Token>) {
                 val token = response.body()?.token
                 if (!response.isSuccessful || token == null) {
-                    submitButton?.isEnabled = true
                     showMessage("Invalid username or password.")
                     return
                 }

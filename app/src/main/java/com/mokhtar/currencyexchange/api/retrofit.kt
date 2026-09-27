@@ -9,6 +9,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.Header
 import retrofit2.http.POST
 
 object ExchangeService {
@@ -29,7 +30,15 @@ interface Exchange {
     fun getExchangeRates(): Call<ExchangeRates>
 
     @POST("/transaction")
-    fun addTransaction(@Body transaction: Transaction): Call<Any>
+    fun addTransaction(
+        @Body transaction: Transaction,
+        @Header("Authorization") authorization: String?
+    ): Call<Any>
+
+    @GET("/transaction")
+    fun getTransactions(
+        @Header("Authorization") authorization: String
+    ): Call<List<Transaction>>
 
     @POST("/user")
     fun addUser(@Body user: User): Call<User>

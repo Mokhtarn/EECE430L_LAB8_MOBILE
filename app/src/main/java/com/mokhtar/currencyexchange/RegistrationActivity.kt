@@ -39,16 +39,13 @@ class RegistrationActivity : AppCompatActivity() {
             password = passwordEditText?.editText?.text.toString()
         }
 
-        submitButton?.isEnabled = false
         ExchangeService.exchangeApi().addUser(user).enqueue(object : Callback<User> {
             override fun onFailure(call: Call<User>, t: Throwable) {
-                submitButton?.isEnabled = true
                 showMessage("Could not create account.")
             }
 
             override fun onResponse(call: Call<User>, response: Response<User>) {
                 if (!response.isSuccessful) {
-                    submitButton?.isEnabled = true
                     showMessage("Could not create account.")
                     return
                 }
@@ -61,14 +58,12 @@ class RegistrationActivity : AppCompatActivity() {
     private fun authenticate(user: User) {
         ExchangeService.exchangeApi().authenticate(user).enqueue(object : Callback<Token> {
             override fun onFailure(call: Call<Token>, t: Throwable) {
-                submitButton?.isEnabled = true
                 showMessage("Account created, but login failed.")
             }
 
             override fun onResponse(call: Call<Token>, response: Response<Token>) {
                 val token = response.body()?.token
                 if (!response.isSuccessful || token == null) {
-                    submitButton?.isEnabled = true
                     showMessage("Account created, but login failed.")
                     return
                 }
