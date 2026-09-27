@@ -7,30 +7,31 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.RadioGroup
-import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.viewpager2.widget.ViewPager2
+import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.tabs.TabLayout
+import com.google.android.material.tabs.TabLayoutMediator
 import com.google.android.material.textfield.TextInputLayout
-import com.google.android.material.appbar.MaterialToolbar
 import com.mokhtar.currencyexchange.api.Authentication
 import com.mokhtar.currencyexchange.api.ExchangeService
-import com.mokhtar.currencyexchange.api.model.ExchangeRates
 import com.mokhtar.currencyexchange.api.model.Transaction
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
 class MainActivity : AppCompatActivity() {
-    private var buyUsdTextView: TextView? = null
-    private var sellUsdTextView: TextView? = null
     private var fab: FloatingActionButton? = null
     private var transactionDialog: View? = null
     private var menu: Menu? = null
+    private var tabLayout: TabLayout? = null
+    private var tabsViewPager: ViewPager2? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,8 +42,21 @@ class MainActivity : AppCompatActivity() {
         val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
 
-        buyUsdTextView = findViewById(R.id.txtBuyUsdRate)
-        sellUsdTextView = findViewById(R.id.txtSellUsdRate)
+        tabLayout = findViewById(R.id.tabLayout)
+        tabsViewPager = findViewById(R.id.tabsViewPager)
+        tabLayout?.tabMode = TabLayout.MODE_FIXED
+        tabLayout?.isInlineLabel = true
+        tabsViewPager?.isUserInputEnabled = true
+        val adapter = TabsPagerAdapter(supportFragmentManager, lifecycle)
+        tabsViewPager?.adapter = adapter
+
+        TabLayoutMediator(tabLayout!!, tabsViewPager!!) { tab, position ->
+            when (position) {
+                0 -> tab.text = "Exchange"
+                1 -> tab.text = "Transactions"
+            }
+        }.attach()
+
         fab = findViewById(R.id.fab)
 
         fab?.setOnClickListener {
@@ -54,8 +68,6 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-
-        fetchRates()
     }
 
     override fun onResume() {
@@ -101,23 +113,6 @@ class MainActivity : AppCompatActivity() {
 
             else -> super.onOptionsItemSelected(item)
         }
-    }
-
-    private fun fetchRates() {
-        ExchangeService.exchangeApi().getExchangeRates().enqueue(object : Callback<ExchangeRates> {
-            override fun onResponse(
-                call: Call<ExchangeRates>,
-                response: Response<ExchangeRates>
-            ) {
-                val responseBody: ExchangeRates? = response.body()
-                buyUsdTextView?.text = responseBody?.usdToLbp?.toString()
-                sellUsdTextView?.text = responseBody?.lbpToUsd?.toString()
-            }
-
-            override fun onFailure(call: Call<ExchangeRates>, t: Throwable) {
-                return
-            }
-        })
     }
 
     private fun showDialog() {
