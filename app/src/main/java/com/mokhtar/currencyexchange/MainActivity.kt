@@ -1,7 +1,10 @@
 package com.mokhtar.currencyexchange
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.RadioGroup
 import android.widget.TextView
@@ -13,6 +16,8 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputLayout
+import com.google.android.material.appbar.MaterialToolbar
+import com.mokhtar.currencyexchange.api.Authentication
 import com.mokhtar.currencyexchange.api.ExchangeService
 import com.mokhtar.currencyexchange.api.model.ExchangeRates
 import com.mokhtar.currencyexchange.api.model.Transaction
@@ -25,11 +30,16 @@ class MainActivity : AppCompatActivity() {
     private var sellUsdTextView: TextView? = null
     private var fab: FloatingActionButton? = null
     private var transactionDialog: View? = null
+    private var menu: Menu? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Authentication.initialize(this)
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
+
+        val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
+        setSupportActionBar(toolbar)
 
         buyUsdTextView = findViewById(R.id.txtBuyUsdRate)
         sellUsdTextView = findViewById(R.id.txtSellUsdRate)
@@ -46,6 +56,51 @@ class MainActivity : AppCompatActivity() {
         }
 
         fetchRates()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        setMenu()
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        this.menu = menu
+        setMenu()
+        return true
+    }
+
+    private fun setMenu() {
+        menu?.clear()
+        menuInflater.inflate(
+            if (Authentication.getToken() == null) {
+                R.menu.menu_logged_out
+            } else {
+                R.menu.menu_logged_in
+            },
+            menu
+        )
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.login -> {
+                startActivity(Intent(this, LoginActivity::class.java))
+                true
+            }
+
+            R.id.register -> {
+                startActivity(Intent(this, RegistrationActivity::class.java))
+                true
+            }
+
+            R.id.logout -> {
+                Authentication.clearToken()
+                setMenu()
+                true
+            }
+
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 
     private fun fetchRates() {

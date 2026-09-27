@@ -1,6 +1,8 @@
 *.iml
 .gradle
+.kotlin/
 /local.properties
+.idea/
 /.idea/caches
 /.idea/libraries
 /.idea/modules.xml
@@ -13,3 +15,20 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Android build outputs
+*.apk
+*.ap_
+*.aab
+*.dex
+
+# Local signing/secrets
+*.jks
+*.keystore
+keystore.properties
+secrets.properties
+google-services.json
+*.hprof
+
+# Course handout
+Lab 9-Mobile II.pdf
